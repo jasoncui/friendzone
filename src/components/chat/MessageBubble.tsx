@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation } from "convex/react";
 import { motion } from "framer-motion";
 import { api } from "../../../convex/_generated/api";
@@ -8,6 +8,7 @@ import { timeAgo } from "@/lib/channelUtils";
 import { Avatar } from "@/components/ui/Avatar";
 import { ThreadPreview } from "./ThreadPreview";
 import { ReactionBar } from "./ReactionBar";
+import { ReactionPicker } from "./ReactionPicker";
 import { useGroupContext } from "@/lib/UserContext";
 
 interface Props {
@@ -24,9 +25,12 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
   const [editing, setEditing] = useState(false);
   const [editBody, setEditBody] = useState(message.body);
   const [showActions, setShowActions] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const emojiButtonRef = useRef<HTMLButtonElement>(null);
 
   const editMessage = useMutation(api.messages.edit);
   const removeMessage = useMutation(api.messages.remove);
+  const addReaction = useMutation(api.reactions.add);
 
   async function handleEdit() {
     if (!editBody.trim()) return;
@@ -37,7 +41,7 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
   // Deleted messages
   if (message.isDeleted) {
     return (
-      <div className="px-4 py-1">
+      <div className={cn("px-4 py-1", isOwn ? "text-right" : "text-left")}>
         <p className="text-text-tertiary text-sm italic">
           Message deleted
         </p>
@@ -45,7 +49,7 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
     );
   }
 
-  // System messages
+  // System messages — always centered
   if (message.messageType === "system") {
     return (
       <div className="flex justify-center px-4 py-2">
@@ -54,7 +58,6 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
     );
   }
 
-  // Senpai messages
   const isSenpai = message.messageType === "senpai";
 
   return (
@@ -63,13 +66,18 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "group relative px-4 py-1 transition-colors hover:bg-bg-surface/50",
+        "group relative px-4 py-1 transition-colors",
         isSenpai && "border-l-2 border-accent-senpai bg-accent-senpai/5"
       )}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
-      <div className="flex gap-3">
+      <div
+        className={cn(
+          "flex gap-3 max-w-[85%]",
+          isOwn && !isSenpai ? "ml-auto flex-row-reverse" : ""
+        )}
+      >
         {!compact ? (
           <div className="mt-0.5 shrink-0">
             <Avatar
@@ -82,9 +90,19 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
           <div className="w-7 shrink-0" />
         )}
 
-        <div className="min-w-0 flex-1">
+        <div
+          className={cn(
+            "min-w-0 flex-1 flex flex-col",
+            isOwn && !isSenpai ? "items-end" : "items-start"
+          )}
+        >
           {!compact && (
-            <div className="mb-0.5 flex items-baseline gap-2">
+            <div
+              className={cn(
+                "mb-0.5 flex items-baseline gap-2",
+                isOwn && !isSenpai ? "flex-row-reverse" : ""
+              )}
+            >
               <span
                 className={cn(
                   "text-sm font-semibold",
@@ -103,7 +121,7 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
           )}
 
           {editing ? (
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full">
               <input
                 value={editBody}
                 onChange={(e) => setEditBody(e.target.value)}
@@ -129,17 +147,91 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
             </div>
           ) : (
             <>
-              {message.messageType === "game_score" ? (
-                <div className="inline-block rounded-lg bg-bg-elevated px-3 py-2">
-                  <p className="font-mono text-sm whitespace-pre-wrap">
-                    {message.body}
-                  </p>
+              {/* Bubble + side actions wrapper */}
+              <div
+                className={cn(
+                  "relative flex items-center gap-1",
+                  isOwn && !isSenpai ? "flex-row-reverse" : ""
+                )}
+              >
+                {/* Message bubble with overlapping reactions */}
+                <div className="relative mb-1">
+                  <div
+                    className={cn(
+                      "rounded-2xl px-3 py-2",
+                      isOwn && !isSenpai
+                        ? "bg-accent-hangout/20 rounded-br-sm"
+                        : "bg-bg-elevated rounded-bl-sm"
+                    )}
+                  >
+                    {message.messageType === "game_score" ? (
+                      <p className="font-mono text-sm whitespace-pre-wrap">
+                        {message.body}
+                      </p>
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap break-words text-text-primary">
+                        {message.body}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Reaction pills overlapping the bubble bottom */}
+                  <ReactionBar
+                    messageId={message._id}
+                    isOwn={isOwn && !isSenpai}
+                  />
                 </div>
-              ) : (
-                <p className="text-sm whitespace-pre-wrap break-words text-text-primary">
-                  {message.body}
-                </p>
-              )}
+
+                {/* Side hover actions (Messenger style) */}
+                {showActions && !editing && (
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      ref={emojiButtonRef}
+                      onClick={() => setShowPicker(!showPicker)}
+                      className="rounded-full p-1 text-text-tertiary hover:bg-bg-surface hover:text-text-secondary"
+                      title="React"
+                    >
+                      <span className="text-xs">{"\u263A\uFE0F"}</span>
+                    </button>
+                    {isOwn && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditing(true);
+                            setEditBody(message.body);
+                          }}
+                          className="rounded-full p-1 text-text-tertiary hover:bg-bg-surface hover:text-text-secondary"
+                          title="Edit"
+                        >
+                          <span className="text-xs">{"\u270F\uFE0F"}</span>
+                        </button>
+                        <button
+                          onClick={() =>
+                            removeMessage({ messageId: message._id })
+                          }
+                          className="rounded-full p-1 text-text-tertiary hover:bg-bg-surface hover:text-accent-action"
+                          title="Delete"
+                        >
+                          <span className="text-xs">{"\u{1F5D1}\uFE0F"}</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Emoji picker */}
+                {showPicker && (
+                  <ReactionPicker
+                    onSelect={(emoji) => {
+                      addReaction({ messageId: message._id, emoji });
+                      setShowPicker(false);
+                    }}
+                    onClose={() => setShowPicker(false)}
+                    anchorRef={emojiButtonRef}
+                    isOwn={isOwn && !isSenpai}
+                  />
+                )}
+              </div>
 
               {threadHref && message.threadReplyCount > 0 && (
                 <ThreadPreview
@@ -148,34 +240,9 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
                   href={threadHref}
                 />
               )}
-
-              <ReactionBar messageId={message._id} />
             </>
           )}
         </div>
-
-        {/* Action buttons */}
-        {isOwn && showActions && !editing && (
-          <div className="absolute right-3 top-1 flex items-center gap-1 rounded-md border border-border bg-bg-elevated px-1 py-0.5 shadow-lg">
-            <button
-              onClick={() => {
-                setEditing(true);
-                setEditBody(message.body);
-              }}
-              className="rounded p-1 text-xs text-text-secondary hover:bg-bg-surface hover:text-text-primary"
-              title="Edit"
-            >
-              {"\u270F\uFE0F"}
-            </button>
-            <button
-              onClick={() => removeMessage({ messageId: message._id })}
-              className="rounded p-1 text-xs text-text-secondary hover:bg-bg-surface hover:text-accent-action"
-              title="Delete"
-            >
-              {"\u{1F5D1}\uFE0F"}
-            </button>
-          </div>
-        )}
       </div>
     </motion.div>
   );
