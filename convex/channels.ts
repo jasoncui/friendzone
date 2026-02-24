@@ -136,6 +136,31 @@ export const forkFromMessage = mutation({
   },
 });
 
+export const update = mutation({
+  args: {
+    channelId: v.id("channels"),
+    name: v.optional(v.string()),
+    icon: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+
+    const channel = await ctx.db.get(args.channelId);
+    if (!channel) throw new Error("Channel not found");
+
+    await assertGroupMember(ctx, channel.groupId, user._id);
+
+    if (args.name !== undefined) {
+      const trimmed = args.name.trim();
+      if (!trimmed) throw new Error("Channel name cannot be empty");
+      await ctx.db.patch(args.channelId, { name: trimmed });
+    }
+    if (args.icon !== undefined) {
+      await ctx.db.patch(args.channelId, { icon: args.icon || undefined });
+    }
+  },
+});
+
 export const archive = mutation({
   args: { channelId: v.id("channels") },
   handler: async (ctx, args) => {
