@@ -176,10 +176,7 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
                   </div>
 
                   {/* Reaction pills overlapping the bubble bottom */}
-                  <ReactionBar
-                    messageId={message._id}
-                    isOwn={isOwn && !isSenpai}
-                  />
+                  <ReactionBar messageId={message._id} />
                 </div>
 
                 {/* Side hover actions (Messenger style) */}
