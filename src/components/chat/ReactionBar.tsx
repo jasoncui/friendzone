@@ -1,11 +1,9 @@
-import { useState, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { useGroupContext } from "@/lib/UserContext";
-import { ReactionPicker } from "./ReactionPicker";
 
 interface Props {
   messageId: Id<"messages">;
@@ -16,33 +14,9 @@ export function ReactionBar({ messageId }: Props) {
   const reactions = useQuery(api.reactions.getByMessage, { messageId });
   const addReaction = useMutation(api.reactions.add);
   const removeReaction = useMutation(api.reactions.remove);
-  const [showPicker, setShowPicker] = useState(false);
-  const addButtonRef = useRef<HTMLButtonElement>(null);
 
   if (!reactions || reactions.length === 0) {
-    return (
-      <div className="relative mt-1 flex items-center">
-        <button
-          ref={addButtonRef}
-          onClick={() => setShowPicker(!showPicker)}
-          className="rounded-full p-1 text-xs text-text-tertiary opacity-0 transition-opacity group-hover:opacity-100 hover:bg-bg-surface hover:text-text-secondary"
-        >
-          +
-        </button>
-        <AnimatePresence>
-          {showPicker && (
-            <ReactionPicker
-              onSelect={(emoji) => {
-                addReaction({ messageId, emoji });
-                setShowPicker(false);
-              }}
-              onClose={() => setShowPicker(false)}
-              anchorRef={addButtonRef}
-            />
-          )}
-        </AnimatePresence>
-      </div>
-    );
+    return null;
   }
 
   function handleToggle(emoji: string, userIds: string[]) {
@@ -74,25 +48,6 @@ export function ReactionBar({ messageId }: Props) {
           </motion.button>
         );
       })}
-      <button
-        ref={addButtonRef}
-        onClick={() => setShowPicker(!showPicker)}
-        className="rounded-full border border-transparent px-1.5 py-0.5 text-xs text-text-tertiary transition-colors hover:border-border hover:bg-bg-surface hover:text-text-secondary"
-      >
-        +
-      </button>
-      <AnimatePresence>
-        {showPicker && (
-          <ReactionPicker
-            onSelect={(emoji) => {
-              addReaction({ messageId, emoji });
-              setShowPicker(false);
-            }}
-            onClose={() => setShowPicker(false)}
-            anchorRef={addButtonRef}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
