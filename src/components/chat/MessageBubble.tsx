@@ -149,16 +149,13 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
             <>
               {/* Bubble + side actions wrapper */}
               <div
-                className={cn(
-                  "relative flex items-center gap-1",
-                  isOwn && !isSenpai ? "flex-row-reverse" : ""
-                )}
+                className="relative flex items-center gap-1"
               >
                 {/* Message bubble with overlapping reactions */}
                 <div className="relative mb-1">
                   <div
                     className={cn(
-                      "rounded-2xl px-3 py-2",
+                      "relative rounded-2xl px-3 py-2",
                       isOwn && !isSenpai
                         ? "bg-accent-hangout/20 rounded-br-sm"
                         : "bg-bg-elevated rounded-bl-sm"
@@ -173,15 +170,13 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
                         {message.body}
                       </p>
                     )}
-                  </div>
 
-                  {/* Reaction pills overlapping the bubble bottom */}
-                  <ReactionBar messageId={message._id} />
-                </div>
-
-                {/* Side hover actions (Messenger style) */}
-                {showActions && !editing && (
-                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Side hover actions (Messenger style) */}
+                    {showActions && !editing && (
+                      <div className={cn(
+                        "absolute top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity",
+                        isOwn && !isSenpai ? "right-full mr-1" : "left-full ml-1"
+                      )}>
                     <button
                       ref={emojiButtonRef}
                       onClick={() => setShowPicker(!showPicker)}
@@ -213,21 +208,26 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
                         </button>
                       </>
                     )}
-                  </div>
-                )}
+                      </div>
+                    )}
 
-                {/* Emoji picker */}
-                {showPicker && (
-                  <ReactionPicker
-                    onSelect={(emoji) => {
-                      addReaction({ messageId: message._id, emoji });
-                      setShowPicker(false);
-                    }}
-                    onClose={() => setShowPicker(false)}
-                    anchorRef={emojiButtonRef}
-                    isOwn={isOwn && !isSenpai}
-                  />
-                )}
+                    {/* Emoji picker */}
+                    {showPicker && (
+                      <ReactionPicker
+                        onSelect={(emoji) => {
+                          addReaction({ messageId: message._id, emoji });
+                          setShowPicker(false);
+                        }}
+                        onClose={() => setShowPicker(false)}
+                        anchorRef={emojiButtonRef}
+                        isOwn={isOwn && !isSenpai}
+                      />
+                    )}
+                  </div>
+
+                  {/* Reaction pills overlapping the bubble bottom */}
+                  <ReactionBar messageId={message._id} />
+                </div>
               </div>
 
               {threadHref && message.threadReplyCount > 0 && (
