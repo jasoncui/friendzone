@@ -62,6 +62,7 @@ function evaluateFrequency(
       "throwback",
       "suggestion",
       "we_should",
+      "random",
     ].includes(triggerType);
   }
 
@@ -118,18 +119,17 @@ export const evaluateAndRespond = internalAction({
     });
 
     // Call AI API
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY!,
-        "anthropic-version": "2023-06-01",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY!}`,
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "gpt-4o-mini",
         max_tokens: 300,
-        system: systemPrompt,
         messages: [
+          { role: "system", content: systemPrompt },
           {
             role: "user",
             content: `Recent chat:\n${formatMessages(recentMessages)}\n\nTrigger: ${args.triggerType}`,
@@ -139,7 +139,11 @@ export const evaluateAndRespond = internalAction({
     });
 
     const data = await response.json();
-    const senpaiMessage = data.content[0].text;
+    if (!response.ok) {
+      console.error("OpenAI API error:", data);
+      return;
+    }
+    const senpaiMessage = data.choices[0].message.content;
 
     // Post the message to the hangout channel
     const hangoutChannel = await ctx.runQuery(
@@ -152,6 +156,38 @@ export const evaluateAndRespond = internalAction({
       body: senpaiMessage,
       senpaiTrigger: args.triggerType,
     });
+  },
+});
+
+export const getSenpaiEnabledGroups = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("groups")
+      .filter((q) => q.eq(q.field("senpaiEnabled"), true))
+      .collect();
+  },
+});
+
+export const randomCronTrigger = internalAction({
+  handler: async (ctx) => {
+    const groups = await ctx.runQuery(
+      internal.senpai.getSenpaiEnabledGroups,
+      {}
+    );
+
+    for (const group of groups) {
+      if (Math.random() > 0.3) continue;
+
+      await ctx.scheduler.runAfter(
+        Math.floor(Math.random() * 10 * 60 * 1000),
+        internal.senpai.evaluateAndRespond,
+        {
+          groupId: group._id,
+          triggerType: "random",
+        }
+      );
+    }
   },
 });
 

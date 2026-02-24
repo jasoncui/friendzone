@@ -11,6 +11,19 @@ import { ReactionBar } from "./ReactionBar";
 import { ReactionPicker } from "./ReactionPicker";
 import { useGroupContext } from "@/lib/UserContext";
 
+const SENPAI_AVATAR = `data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+  '<circle cx="50" cy="50" r="50" fill="#e88aa0"/>' +
+  '<circle cx="35" cy="42" r="5" fill="#2d2d2d"/>' +
+  '<circle cx="65" cy="42" r="5" fill="#2d2d2d"/>' +
+  '<circle cx="33" cy="40" r="1.5" fill="white"/>' +
+  '<circle cx="63" cy="40" r="1.5" fill="white"/>' +
+  '<path d="M 38 58 Q 50 68 62 58" stroke="#2d2d2d" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+  '<circle cx="25" cy="52" r="7" fill="#f5a0b0" opacity="0.6"/>' +
+  '<circle cx="75" cy="52" r="7" fill="#f5a0b0" opacity="0.6"/>' +
+  '</svg>'
+)}`;
+
 interface Props {
   message: Doc<"messages">;
   compact?: boolean;
@@ -59,6 +72,7 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
   }
 
   const isSenpai = message.messageType === "senpai";
+  const showHeader = !compact || isSenpai;
 
   return (
     <motion.div
@@ -78,11 +92,11 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
           isOwn && !isSenpai ? "ml-auto flex-row-reverse" : ""
         )}
       >
-        {!compact ? (
+        {showHeader ? (
           <div className="mt-0.5 shrink-0">
             <Avatar
               name={isSenpai ? "Senpai" : author?.name ?? "Unknown"}
-              url={!isSenpai ? author?.avatarUrl : undefined}
+              url={isSenpai ? SENPAI_AVATAR : author?.avatarUrl}
               size="sm"
             />
           </div>
@@ -96,7 +110,7 @@ export function MessageBubble({ message, compact, threadHref }: Props) {
             isOwn && !isSenpai ? "items-end" : "items-start"
           )}
         >
-          {!compact && (
+          {showHeader && (
             <div
               className={cn(
                 "mb-0.5 flex items-baseline gap-2",
