@@ -9,4 +9,10 @@ crons.daily(
   internal.events.archivePastEvents
 );
 
+crons.interval(
+  "senpai-random-messages",
+  { hours: 4 },
+  internal.senpai.randomCronTrigger
+);
+
 export default crons;

@@ -5,6 +5,7 @@ interface AvatarProps {
   url?: string;
   size?: "sm" | "md" | "lg";
   online?: boolean;
+  emoji?: string;
 }
 
 const sizeClasses = {
@@ -43,7 +44,7 @@ function getColor(name: string) {
   return colors[Math.abs(hash) % colors.length];
 }
 
-export function Avatar({ name, url, size = "md", online }: AvatarProps) {
+export function Avatar({ name, url, size = "md", online, emoji }: AvatarProps) {
   return (
     <div className="relative inline-flex shrink-0">
       {url ? (
@@ -58,12 +59,13 @@ export function Avatar({ name, url, size = "md", online }: AvatarProps) {
       ) : (
         <div
           className={cn(
-            "flex items-center justify-center rounded-full font-semibold text-bg-primary",
+            "flex items-center justify-center rounded-full font-semibold",
+            !emoji && "text-bg-primary",
             sizeClasses[size],
             getColor(name)
           )}
         >
-          {getInitials(name)}
+          {emoji ?? getInitials(name)}
         </div>
       )}
       {online !== undefined && (

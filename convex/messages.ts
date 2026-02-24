@@ -8,6 +8,7 @@ import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { getCurrentUser, assertGroupMember } from "./lib/permissions";
 import { parseGameScore } from "./lib/gameParser";
+import { internal } from "./_generated/api";
 
 export const getById = query({
   args: { messageId: v.id("messages") },
@@ -141,6 +142,20 @@ export const send = mutation({
         attempts: gameScore.attempts,
         messageId,
         createdAt: Date.now(),
+      });
+    }
+
+    // Senpai trigger: detect "we should" / "let's" patterns
+    const lowerBody = args.body.toLowerCase();
+    if (
+      lowerBody.includes("we should") ||
+      lowerBody.includes("let's ") ||
+      lowerBody.includes("lets ")
+    ) {
+      await ctx.scheduler.runAfter(0, internal.senpai.evaluateAndRespond, {
+        groupId: channel.groupId,
+        triggerMessageId: messageId,
+        triggerType: "we_should",
       });
     }
 

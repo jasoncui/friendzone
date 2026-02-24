@@ -82,6 +82,8 @@ export function MessageFeed({ channelId }: Props) {
     if (prev.authorId !== curr.authorId) return false;
     if (prev.messageType === "system" || curr.messageType === "system")
       return false;
+    if (curr.messageType === "senpai" || prev.messageType === "senpai")
+      return false;
     return curr.createdAt - prev.createdAt < 5 * 60 * 1000;
   }
 
