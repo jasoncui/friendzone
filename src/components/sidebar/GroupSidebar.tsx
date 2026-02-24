@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { Link } from "react-router";
 import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
+import type { Doc, Id } from "../../../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { ChannelSidebarItem } from "./ChannelSidebarItem";
 import { Modal } from "@/components/ui/Modal";
+import { EditChannelModal } from "@/components/channels/EditChannelModal";
 
 interface Props {
   groupId: Id<"groups">;
@@ -31,6 +32,7 @@ export function GroupSidebar({ groupId, groupName, onClose }: Props) {
   const [bracketQuestion, setBracketQuestion] = useState("");
   const [loading, setLoading] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [editingChannel, setEditingChannel] = useState<Doc<"channels"> | null>(null);
 
   const activeChannels = channels?.filter((c) => !c.isArchived) ?? [];
   const archivedChannels = channels?.filter((c) => c.isArchived) ?? [];
@@ -99,7 +101,7 @@ export function GroupSidebar({ groupId, groupName, onClose }: Props) {
               <div className="flex flex-col gap-0.5">
                 {sectionChannels.map((channel) => (
                   <div key={channel._id} onClick={onClose}>
-                    <ChannelSidebarItem channel={channel} />
+                    <ChannelSidebarItem channel={channel} onEdit={setEditingChannel} />
                   </div>
                 ))}
               </div>
@@ -127,7 +129,7 @@ export function GroupSidebar({ groupId, groupName, onClose }: Props) {
               <div className="flex flex-col gap-0.5">
                 {archivedChannels.map((channel) => (
                   <div key={channel._id} onClick={onClose}>
-                    <ChannelSidebarItem channel={channel} />
+                    <ChannelSidebarItem channel={channel} onEdit={setEditingChannel} />
                   </div>
                 ))}
               </div>
@@ -222,6 +224,14 @@ export function GroupSidebar({ groupId, groupName, onClose }: Props) {
           </div>
         </form>
       </Modal>
+
+      {editingChannel && (
+        <EditChannelModal
+          open={!!editingChannel}
+          onClose={() => setEditingChannel(null)}
+          channel={editingChannel}
+        />
+      )}
     </div>
   );
 }

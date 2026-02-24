@@ -53,6 +53,7 @@ export default defineSchema({
   channels: defineTable({
     groupId: v.id("groups"),
     name: v.string(),
+    icon: v.optional(v.string()),
     type: v.union(
       v.literal("hangout"),
       v.literal("event"),

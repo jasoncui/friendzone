@@ -16,8 +16,8 @@ export function getAccentClass(type: ChannelType) {
   return CHANNEL_ACCENTS[type];
 }
 
-export function getChannelIcon(type: ChannelType) {
-  return CHANNEL_ICONS[type];
+export function getChannelIcon(type: ChannelType, customIcon?: string) {
+  return customIcon || CHANNEL_ICONS[type];
 }
 
 export function timeAgo(timestamp: number): string {
