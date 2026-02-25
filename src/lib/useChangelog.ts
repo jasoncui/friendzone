@@ -18,13 +18,24 @@ function classifyTag(title: string): ChangelogEntry["tag"] {
   return "improvement";
 }
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "$1")   // **bold**
+    .replace(/\*(.+?)\*/g, "$1")        // *italic*
+    .replace(/__(.+?)__/g, "$1")        // __bold__
+    .replace(/_(.+?)_/g, "$1")          // _italic_
+    .replace(/`(.+?)`/g, "$1")          // `code`
+    .replace(/\[(.+?)\]\(.+?\)/g, "$1") // [link](url)
+    .replace(/^#+\s*/gm, "");           // headings
+}
+
 function extractSummary(body: string | null): string {
   if (!body) return "";
   const summaryMatch = body.match(/## Summary\s*\n([\s\S]*?)(?=\n## |\n---|\n\n🤖|$)/);
   if (!summaryMatch?.[1]) return "";
   const lines = summaryMatch[1]
     .split("\n")
-    .map((l) => l.replace(/^[-*]\s*/, "").trim())
+    .map((l) => stripMarkdown(l.replace(/^[-*]\s*/, "").trim()))
     .filter(Boolean)
     .slice(0, 3);
   return lines.join(". ");
