@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { api } from "../../../convex/_generated/api";
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
+import { useGroupContext } from "@/lib/UserContext";
 import { ChannelSidebarItem } from "./ChannelSidebarItem";
 import { Modal } from "@/components/ui/Modal";
 import { EditChannelModal } from "@/components/channels/EditChannelModal";
@@ -23,6 +24,10 @@ const SECTIONS: { type: ChannelType; label: string; accent: string }[] = [
 ];
 
 export function GroupSidebar({ groupId, groupName, onClose }: Props) {
+  const { currentUser, group } = useGroupContext();
+  const currentMember = group.members.find((m) => m.userId === currentUser._id);
+  const isAdmin = currentMember?.role === "owner" || currentMember?.role === "admin";
+
   const channels = useQuery(api.channels.listByGroup, { groupId });
   const createChannel = useMutation(api.channels.create);
 
@@ -60,7 +65,9 @@ export function GroupSidebar({ groupId, groupName, onClose }: Props) {
   const navLinks = [
     { to: `/g/${groupId}/hall-of-fame`, label: "Hall of Fame", icon: "\u{1F3C5}" },
     { to: `/g/${groupId}/media`, label: "Media", icon: "\u{1F4F7}" },
-    { to: `/g/${groupId}/settings`, label: "Settings", icon: "\u2699\uFE0F" },
+    { to: `/g/${groupId}/splits`, label: "Splits", icon: "\u{1F4B0}" },
+    { to: `/g/${groupId}/profile`, label: "Profile", icon: "\u{1F464}" },
+    ...(isAdmin ? [{ to: `/g/${groupId}/settings`, label: "Settings", icon: "\u2699\uFE0F" }] : []),
   ];
 
   return (
