@@ -9,7 +9,6 @@ import { Thread } from "./pages/group/Thread";
 import { Bracket } from "./pages/group/Bracket";
 import { HallOfFame } from "./pages/group/HallOfFame";
 import { Media } from "./pages/group/Media";
-import { Splits } from "./pages/group/Splits";
 import { Settings } from "./pages/group/Settings";
 import { Changelog } from "./pages/Changelog";
 
@@ -43,7 +42,6 @@ export const router = createBrowserRouter([
       { path: "bracket/:bracketId", element: <Bracket /> },
       { path: "hall-of-fame", element: <HallOfFame /> },
       { path: "media", element: <Media /> },
-      { path: "splits", element: <Splits /> },
       { path: "settings", element: <Settings /> },
     ],
   },

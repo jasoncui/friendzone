@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Doc } from "../../../convex/_generated/dataModel";
 import { RsvpBar } from "./RsvpBar";
 import { Checklist } from "./Checklist";
+import { EventSplits } from "./EventSplits";
 
 interface Props {
   channel: Doc<"channels">;
@@ -9,6 +10,7 @@ interface Props {
 
 export function EventHeader({ channel }: Props) {
   const [showChecklist, setShowChecklist] = useState(false);
+  const [showSplits, setShowSplits] = useState(false);
 
   const eventDate = channel.eventDate
     ? new Date(channel.eventDate)
@@ -46,12 +48,20 @@ export function EventHeader({ channel }: Props) {
               )}
             </div>
           </div>
-          <button
-            onClick={() => setShowChecklist(!showChecklist)}
-            className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-bg-surface hover:text-text-primary"
-          >
-            {showChecklist ? "Hide" : "Checklist"}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowChecklist(!showChecklist)}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-bg-surface hover:text-text-primary"
+            >
+              {showChecklist ? "Hide" : "Checklist"}
+            </button>
+            <button
+              onClick={() => setShowSplits(!showSplits)}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-bg-surface hover:text-text-primary"
+            >
+              {showSplits ? "Hide" : "Splits"}
+            </button>
+          </div>
         </div>
 
         <RsvpBar channelId={channel._id} />
@@ -60,6 +70,12 @@ export function EventHeader({ channel }: Props) {
       {showChecklist && (
         <div className="border-t border-border px-4 py-3">
           <Checklist channelId={channel._id} />
+        </div>
+      )}
+
+      {showSplits && (
+        <div className="border-t border-border px-4 py-3">
+          <EventSplits channelId={channel._id} />
         </div>
       )}
     </div>

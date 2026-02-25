@@ -28,18 +28,30 @@ export const getByChannel = query({
   },
 });
 
-export const getBalances = query({
-  args: { groupId: v.id("groups") },
+export const getBalancesByChannel = query({
+  args: { channelId: v.id("channels") },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
-    await assertGroupMember(ctx, args.groupId, user._id);
+    const channel = await ctx.db.get(args.channelId);
+    if (!channel) throw new Error("Channel not found");
 
-    return await ctx.db
-      .query("splitBalances")
-      .withIndex("by_group_unpaid", (q) =>
-        q.eq("groupId", args.groupId).eq("isPaid", false)
-      )
+    const user = await getCurrentUser(ctx);
+    await assertGroupMember(ctx, channel.groupId, user._id);
+
+    const splits = await ctx.db
+      .query("splits")
+      .withIndex("by_channel", (q) => q.eq("channelId", args.channelId))
       .collect();
+
+    const balances = [];
+    for (const split of splits) {
+      const splitBalances = await ctx.db
+        .query("splitBalances")
+        .withIndex("by_split", (q) => q.eq("splitId", split._id))
+        .filter((q) => q.eq(q.field("isPaid"), false))
+        .collect();
+      balances.push(...splitBalances);
+    }
+    return balances;
   },
 });
 

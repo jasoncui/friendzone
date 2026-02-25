@@ -60,7 +60,6 @@ export function GroupSidebar({ groupId, groupName, onClose }: Props) {
   const navLinks = [
     { to: `/g/${groupId}/hall-of-fame`, label: "Hall of Fame", icon: "\u{1F3C5}" },
     { to: `/g/${groupId}/media`, label: "Media", icon: "\u{1F4F7}" },
-    { to: `/g/${groupId}/splits`, label: "Splits", icon: "\u{1F4B0}" },
     { to: `/g/${groupId}/settings`, label: "Settings", icon: "\u2699\uFE0F" },
   ];
 
