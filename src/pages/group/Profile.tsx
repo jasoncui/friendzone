@@ -57,6 +57,7 @@ export function Profile() {
   const [processing, setProcessing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -78,14 +79,18 @@ export function Profile() {
 
   async function handleSave() {
     setSaving(true);
+    setError(null);
     try {
       await updateProfile({
         name: name.trim(),
         username: username.trim(),
         avatarDataUrl: pendingAvatarDataUrl,
       });
+      setPendingAvatarDataUrl(undefined);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save profile");
     } finally {
       setSaving(false);
     }
@@ -197,6 +202,11 @@ export function Profile() {
           )}
 
           {/* Save */}
+          {error && (
+            <p className="rounded-lg bg-red-500/10 px-4 py-2 text-sm text-red-400">
+              {error}
+            </p>
+          )}
           <button
             onClick={handleSave}
             disabled={saving || !name.trim() || !username.trim()}
