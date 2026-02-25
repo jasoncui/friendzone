@@ -29,7 +29,9 @@ export function MessageFeed({ channelId }: Props) {
   useEffect(() => {
     if (messages.length > 0 && status !== "LoadingFirstPage") {
       if (!didInitialScroll.current) {
-        bottomRef.current?.scrollIntoView();
+        requestAnimationFrame(() => {
+          bottomRef.current?.scrollIntoView();
+        });
         didInitialScroll.current = true;
       } else {
         // Only auto-scroll if user is near the bottom
