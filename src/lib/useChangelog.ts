@@ -21,7 +21,7 @@ function classifyTag(title: string): ChangelogEntry["tag"] {
 function extractSummary(body: string | null): string {
   if (!body) return "";
   const summaryMatch = body.match(/## Summary\s*\n([\s\S]*?)(?=\n## |\n---|\n\n🤖|$)/);
-  if (!summaryMatch) return "";
+  if (!summaryMatch?.[1]) return "";
   const lines = summaryMatch[1]
     .split("\n")
     .map((l) => l.replace(/^[-*]\s*/, "").trim())
