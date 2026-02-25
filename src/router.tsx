@@ -11,11 +11,16 @@ import { HallOfFame } from "./pages/group/HallOfFame";
 import { Media } from "./pages/group/Media";
 import { Splits } from "./pages/group/Splits";
 import { Settings } from "./pages/group/Settings";
+import { Changelog } from "./pages/Changelog";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Landing />,
+  },
+  {
+    path: "/changelog",
+    element: <Changelog />,
   },
   {
     path: "/sign-in",
