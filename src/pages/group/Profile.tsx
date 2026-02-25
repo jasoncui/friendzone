@@ -29,7 +29,7 @@ function imageToPixelSvg(file: File): Promise<string> {
       for (let y = 0; y < GRID_SIZE; y++) {
         for (let x = 0; x < GRID_SIZE; x++) {
           const i = (y * GRID_SIZE + x) * 4;
-          const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+          const r = data[i] ?? 0, g = data[i + 1] ?? 0, b = data[i + 2] ?? 0, a = data[i + 3] ?? 0;
           if (a > 10) {
             rects += `<rect x="${x * CELL_SIZE}" y="${y * CELL_SIZE}" width="${CELL_SIZE}" height="${CELL_SIZE}" fill="rgb(${r},${g},${b})" opacity="${(a / 255).toFixed(2)}"/>`;
           }
