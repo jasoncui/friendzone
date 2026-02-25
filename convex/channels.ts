@@ -141,6 +141,12 @@ export const update = mutation({
     channelId: v.id("channels"),
     name: v.optional(v.string()),
     icon: v.optional(v.string()),
+    eventDate: v.optional(v.number()),
+    eventEndDate: v.optional(v.number()),
+    eventLocation: v.optional(v.string()),
+    clearEventDate: v.optional(v.boolean()),
+    clearEventEndDate: v.optional(v.boolean()),
+    clearEventLocation: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
@@ -150,13 +156,34 @@ export const update = mutation({
 
     await assertGroupMember(ctx, channel.groupId, user._id);
 
+    const patch: Record<string, unknown> = {};
+
     if (args.name !== undefined) {
       const trimmed = args.name.trim();
       if (!trimmed) throw new Error("Channel name cannot be empty");
-      await ctx.db.patch(args.channelId, { name: trimmed });
+      patch.name = trimmed;
     }
     if (args.icon !== undefined) {
-      await ctx.db.patch(args.channelId, { icon: args.icon || undefined });
+      patch.icon = args.icon || undefined;
+    }
+    if (args.eventDate !== undefined) {
+      patch.eventDate = args.eventDate;
+    } else if (args.clearEventDate) {
+      patch.eventDate = undefined;
+    }
+    if (args.eventEndDate !== undefined) {
+      patch.eventEndDate = args.eventEndDate;
+    } else if (args.clearEventEndDate) {
+      patch.eventEndDate = undefined;
+    }
+    if (args.eventLocation !== undefined) {
+      patch.eventLocation = args.eventLocation || undefined;
+    } else if (args.clearEventLocation) {
+      patch.eventLocation = undefined;
+    }
+
+    if (Object.keys(patch).length > 0) {
+      await ctx.db.patch(args.channelId, patch);
     }
   },
 });

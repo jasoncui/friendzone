@@ -1,17 +1,23 @@
-import { useState } from "react";
 import type { Doc } from "../../../convex/_generated/dataModel";
+import type { SidebarTab } from "./EventSidebarPanel";
 import { RsvpBar } from "./RsvpBar";
-import { Checklist } from "./Checklist";
-import { EventSplits } from "./EventSplits";
+import { cn } from "@/lib/utils";
 
 interface Props {
   channel: Doc<"channels">;
+  activeTab: SidebarTab | null;
+  onTabChange: (tab: SidebarTab) => void;
 }
 
-export function EventHeader({ channel }: Props) {
-  const [showChecklist, setShowChecklist] = useState(false);
-  const [showSplits, setShowSplits] = useState(false);
+const TAB_BUTTONS: { value: SidebarTab; label: string; icon: string }[] = [
+  { value: "participants", label: "People", icon: "\u{1F465}" },
+  { value: "checklist", label: "Checklist", icon: "\u2705" },
+  { value: "flights", label: "Flights", icon: "\u2708\uFE0F" },
+  { value: "accommodation", label: "Stay", icon: "\u{1F3E0}" },
+  { value: "splits", label: "Splits", icon: "\u{1F4B5}" },
+];
 
+export function EventHeader({ channel, activeTab, onTabChange }: Props) {
   const eventDate = channel.eventDate
     ? new Date(channel.eventDate)
     : null;
@@ -48,36 +54,27 @@ export function EventHeader({ channel }: Props) {
               )}
             </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowChecklist(!showChecklist)}
-              className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-bg-surface hover:text-text-primary"
-            >
-              {showChecklist ? "Hide" : "Checklist"}
-            </button>
-            <button
-              onClick={() => setShowSplits(!showSplits)}
-              className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-bg-surface hover:text-text-primary"
-            >
-              {showSplits ? "Hide" : "Splits"}
-            </button>
+          <div className="flex gap-1">
+            {TAB_BUTTONS.map(({ value, label, icon }) => (
+              <button
+                key={value}
+                onClick={() => onTabChange(value)}
+                className={cn(
+                  "rounded-lg px-2 py-1.5 text-xs font-medium transition-colors",
+                  activeTab === value
+                    ? "bg-accent-event/20 text-accent-event"
+                    : "text-text-tertiary hover:bg-bg-surface hover:text-text-secondary"
+                )}
+                title={label}
+              >
+                <span className="text-sm">{icon}</span>
+              </button>
+            ))}
           </div>
         </div>
 
         <RsvpBar channelId={channel._id} />
       </div>
-
-      {showChecklist && (
-        <div className="border-t border-border px-4 py-3">
-          <Checklist channelId={channel._id} />
-        </div>
-      )}
-
-      {showSplits && (
-        <div className="border-t border-border px-4 py-3">
-          <EventSplits channelId={channel._id} />
-        </div>
-      )}
     </div>
   );
 }

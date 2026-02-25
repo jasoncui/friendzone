@@ -35,6 +35,10 @@ export function GroupSidebar({ groupId, groupName, onClose }: Props) {
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState<ChannelType>("hangout");
   const [bracketQuestion, setBracketQuestion] = useState("");
+  const [eventDateMode, setEventDateMode] = useState<"single" | "range" | "tbd">("single");
+  const [eventDate, setEventDate] = useState("");
+  const [eventEndDate, setEventEndDate] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
   const [loading, setLoading] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [editingChannel, setEditingChannel] = useState<Doc<"channels"> | null>(null);
@@ -51,12 +55,28 @@ export function GroupSidebar({ groupId, groupName, onClose }: Props) {
         groupId,
         name: newName.trim(),
         type: newType,
+        eventDate:
+          newType === "event" && eventDateMode !== "tbd" && eventDate
+            ? new Date(eventDate).getTime()
+            : undefined,
+        eventEndDate:
+          newType === "event" && eventDateMode === "range" && eventEndDate
+            ? new Date(eventEndDate).getTime()
+            : undefined,
+        eventLocation:
+          newType === "event" && eventLocation.trim()
+            ? eventLocation.trim()
+            : undefined,
         bracketQuestion:
           newType === "bracket" ? bracketQuestion.trim() || undefined : undefined,
       });
       setShowCreate(false);
       setNewName("");
       setBracketQuestion("");
+      setEventDateMode("single");
+      setEventDate("");
+      setEventEndDate("");
+      setEventLocation("");
     } finally {
       setLoading(false);
     }
@@ -211,6 +231,51 @@ export function GroupSidebar({ groupId, groupName, onClose }: Props) {
               placeholder="Bracket question (e.g., Best pizza place?)"
               className="mb-3 w-full rounded-lg border border-border bg-bg-surface px-4 py-3 text-text-primary placeholder:text-text-tertiary focus:border-border-focus focus:outline-none"
             />
+          )}
+          {newType === "event" && (
+            <div className="mb-3 flex flex-col gap-2">
+              <div className="flex gap-1">
+                {(["single", "range", "tbd"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setEventDateMode(mode)}
+                    className={cn(
+                      "rounded-lg px-2.5 py-1 text-xs font-medium capitalize transition-colors",
+                      eventDateMode === mode
+                        ? "bg-accent-event/20 text-accent-event"
+                        : "text-text-tertiary hover:text-text-secondary"
+                    )}
+                  >
+                    {mode === "tbd" ? "TBD" : mode === "single" ? "Date" : "Range"}
+                  </button>
+                ))}
+              </div>
+              {eventDateMode !== "tbd" && (
+                <input
+                  type="date"
+                  value={eventDate}
+                  onChange={(e) => setEventDate(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-bg-surface px-4 py-3 text-text-primary focus:border-border-focus focus:outline-none"
+                />
+              )}
+              {eventDateMode === "range" && (
+                <input
+                  type="date"
+                  value={eventEndDate}
+                  onChange={(e) => setEventEndDate(e.target.value)}
+                  placeholder="End date"
+                  className="w-full rounded-lg border border-border bg-bg-surface px-4 py-3 text-text-primary focus:border-border-focus focus:outline-none"
+                />
+              )}
+              <input
+                type="text"
+                value={eventLocation}
+                onChange={(e) => setEventLocation(e.target.value)}
+                placeholder="Location (optional)"
+                className="w-full rounded-lg border border-border bg-bg-surface px-4 py-3 text-text-primary placeholder:text-text-tertiary focus:border-border-focus focus:outline-none"
+              />
+            </div>
           )}
           <div className="flex justify-end gap-2">
             <button
