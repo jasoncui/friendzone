@@ -48,9 +48,20 @@ export function ChannelSidebarItem({ channel, onEdit }: Props) {
         <span className={cn("text-base", accentColor)}>
           {getChannelIcon(channel.type, channel.icon)}
         </span>
-        <span className={cn("min-w-0 flex-1 truncate", channel.isArchived && "line-through opacity-50")}>
-          {channel.name}
-        </span>
+        <div className="min-w-0 flex-1">
+          <span className={cn("block truncate", channel.isArchived && "line-through opacity-50")}>
+            {channel.name}
+          </span>
+          {channel.type === "event" && channel.eventDate && (
+            <span className="block truncate text-xs text-text-tertiary">
+              {new Date(channel.eventDate).toLocaleDateString(undefined, {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              })}
+            </span>
+          )}
+        </div>
         {onEdit && (
           <button
             onClick={(e) => {

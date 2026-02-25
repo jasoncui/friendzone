@@ -12,6 +12,7 @@ import type * as brackets from "../brackets.js";
 import type * as channels from "../channels.js";
 import type * as crons from "../crons.js";
 import type * as dailyGames from "../dailyGames.js";
+import type * as eventTravel from "../eventTravel.js";
 import type * as events from "../events.js";
 import type * as groups from "../groups.js";
 import type * as hallOfFame from "../hallOfFame.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   channels: typeof channels;
   crons: typeof crons;
   dailyGames: typeof dailyGames;
+  eventTravel: typeof eventTravel;
   events: typeof events;
   groups: typeof groups;
   hallOfFame: typeof hallOfFame;

@@ -247,6 +247,43 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_channel", ["channelId"]),
 
+  eventFlights: defineTable({
+    channelId: v.id("channels"),
+    createdBy: v.id("users"),
+    airline: v.string(),
+    flightNumber: v.string(),
+    departureAirport: v.string(),
+    arrivalAirport: v.string(),
+    departureTime: v.number(),
+    arrivalTime: v.number(),
+    status: v.union(v.literal("option"), v.literal("booked")),
+    passengers: v.array(v.id("users")),
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_channel", ["channelId"]),
+
+  eventAccommodations: defineTable({
+    channelId: v.id("channels"),
+    createdBy: v.id("users"),
+    name: v.string(),
+    type: v.union(
+      v.literal("airbnb"),
+      v.literal("hotel"),
+      v.literal("hostel"),
+      v.literal("other")
+    ),
+    address: v.optional(v.string()),
+    checkIn: v.optional(v.number()),
+    checkOut: v.optional(v.number()),
+    bookingLink: v.optional(v.string()),
+    pricePerNight: v.optional(v.number()),
+    totalPrice: v.optional(v.number()),
+    status: v.union(v.literal("option"), v.literal("booked")),
+    guests: v.array(v.id("users")),
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_channel", ["channelId"]),
+
   // ─── BILL SPLITS ─────────────────────────────────────────
   splits: defineTable({
     channelId: v.id("channels"),
