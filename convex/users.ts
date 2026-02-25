@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { getCurrentUser } from "./lib/permissions";
 
 export const me = query({
   args: {},
@@ -51,6 +52,22 @@ export const createOrUpdate = mutation({
       username: args.username,
       avatarUrl: args.avatarUrl,
       createdAt: Date.now(),
+    });
+  },
+});
+
+export const updateProfile = mutation({
+  args: {
+    name: v.string(),
+    username: v.string(),
+    avatarDataUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    await ctx.db.patch(user._id, {
+      name: args.name,
+      username: args.username,
+      ...(args.avatarDataUrl !== undefined ? { avatarUrl: args.avatarDataUrl } : {}),
     });
   },
 });

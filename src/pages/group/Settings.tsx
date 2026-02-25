@@ -42,6 +42,15 @@ export function Settings() {
     setTimeout(() => setHofSaved(false), 2000);
   }
 
+  if (!isAdmin) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+        <span className="text-3xl">🔒</span>
+        <p className="text-sm text-text-secondary">Settings are admin-only.</p>
+      </div>
+    );
+  }
+
   const [senpaiEnabled, setSenpaiEnabled] = useState(
     group.senpaiEnabled ?? true
   );
