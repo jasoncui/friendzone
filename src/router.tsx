@@ -11,6 +11,7 @@ import { HallOfFame } from "./pages/group/HallOfFame";
 import { Media } from "./pages/group/Media";
 import { Splits } from "./pages/group/Splits";
 import { Settings } from "./pages/group/Settings";
+import { Profile } from "./pages/group/Profile";
 import { Changelog } from "./pages/Changelog";
 
 export const router = createBrowserRouter([
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
       { path: "media", element: <Media /> },
       { path: "splits", element: <Splits /> },
       { path: "settings", element: <Settings /> },
+      { path: "profile", element: <Profile /> },
     ],
   },
 ]);
