@@ -15,7 +15,7 @@ interface Props {
 
 function toDateInputValue(timestamp: number | undefined): string {
   if (!timestamp) return "";
-  return new Date(timestamp).toISOString().split("T")[0];
+  return new Date(timestamp).toISOString().split("T")[0] ?? "";
 }
 
 export function EditChannelModal({ open, onClose, channel }: Props) {
